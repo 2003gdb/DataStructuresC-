@@ -4,19 +4,16 @@
 using namespace std;
 
 int main() {
-    Graph grafo;
+    Graph<int> grafo;
 
     if (!grafo.loadFile("test.txt")){
         cerr << "No se pudo cargar" << endl;
     }
 
-    grafo.eliminateEdge(0, 7);
-    grafo.eliminateEdge(1, 7);
+    grafo.insertEdge(0, 2);
 
     if (!grafo.saveFile("test.txt")){
-        cerr << "No se pudo guardar" << endl;
+        cerr << "No se pudo cargar" << endl;
     }
-
-
     return 0;
 }

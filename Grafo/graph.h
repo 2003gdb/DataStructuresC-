@@ -4,6 +4,37 @@
 #include "ll.h"
 using namespace std;
 
+template <typename t>
+class Vertex {
+    private:
+        t dato;
+        int index;
+    
+    public:
+        Vertex(): dato(t()), index(0) {}
+        Vertex(int index_): dato(t()), index(index_) {}
+        ~Vertex(){}
+
+        bool operator==(unsigned int edge) const {
+            return index == edge;
+        }
+
+        bool operator!=(unsigned int edge) const {
+            return index != edge;
+        }
+
+        bool operator==(const Vertex& other) const {
+            return index == other.index;
+        }
+
+        bool operator!=(const Vertex& other) const {
+            return index != other.index; 
+        }
+
+        int getIndex(){return index;}
+};
+
+template <typename t>
 class Graph{
     public:
         Graph() {
@@ -13,27 +44,29 @@ class Graph{
         ~Graph() { eliminateGraph(); };
         bool createGraph(unsigned int nSize);
         void eliminateGraph();
-        bool insertEdge(unsigned int vertex, unsigned int edge);
-        bool eliminateEdge(unsigned int vertex, unsigned int edge);
+        bool insertEdge(unsigned int vertex, int edge);
+        bool eliminateEdge(unsigned int vertex, int edge);
         bool loadFile(const string& filename);
         bool saveFile(const string& filename);
 
     private:
-        ListaLigada<int> *table;
+        ListaLigada< Vertex<t> > *table;
         unsigned int size;
 };
 
-bool Graph::createGraph(unsigned int nSize) {
-    if(nSize == 0 || table != nullptr)
+template <typename t>
+bool Graph<t>::createGraph(unsigned int nSize) {
+    if(nSize == 0 || table)
         return false;
-    table = new(std::nothrow) ListaLigada<int>[nSize];
+    table = new(std::nothrow) ListaLigada< Vertex<t> >[nSize];
     if(!table)
         return false;
     size = nSize;
     return true;
 }
 
-void Graph::eliminateGraph() {
+template <typename t>
+void Graph<t>::eliminateGraph() {
     if(table) {
         delete [] table;
         table = nullptr;
@@ -41,23 +74,28 @@ void Graph::eliminateGraph() {
     }
 }
 
-bool Graph::insertEdge(unsigned int vertex, unsigned int edge) {
+template <typename t>
+bool Graph<t>::insertEdge(unsigned int vertex, int edge) {
     if (vertex < size) {
-        if (table[vertex].insertar(edge))
+        Vertex<t> v(edge);
+        if (table[vertex].insertar(v))
             return true;
     } 
     return false;
 }
 
-bool Graph::eliminateEdge(unsigned int vertex, unsigned int edge) {
+template <typename t>
+bool Graph<t>::eliminateEdge(unsigned int vertex, int edge) {
     if (vertex < size) {
-        if (table[vertex].destruirNodo(edge))
+        Vertex<t> v(edge);
+        if (table[vertex].destruirNodo(v))
             return true;
     } 
     return false;
 }
 
-bool Graph::loadFile(const string& filename) {
+template <typename t>
+bool Graph<t>::loadFile(const string& filename) {
     ifstream file;
     string line;
 
@@ -92,7 +130,8 @@ bool Graph::loadFile(const string& filename) {
     return true;
 }
 
-bool Graph::saveFile(const string& filename) {
+template <typename t>
+bool Graph<t>::saveFile(const string& filename) {
     ofstream file;
 
     file.open(filename);
@@ -106,16 +145,9 @@ bool Graph::saveFile(const string& filename) {
 
     int counter = 0;
     while (counter < size){
-        NodoListaLigada<int> *temp = nullptr;
-
-        if (!table[counter].head)
-            return false;
         
-        temp = table[counter].head;
-
-        while (temp){
-            file << temp->dato << " ";
-            temp = temp->next;
+        for (typename ListaLigada< Vertex<t> >:: iterator j(table[counter].begin()); j != table[counter].end(); ++j) {
+            file << (*j).getIndex() << ' ';
         }
         file << endl;
         counter++;

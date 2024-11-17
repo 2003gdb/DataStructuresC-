@@ -12,8 +12,9 @@ class NodoListaLigada{
 
 template <typename t>
 class ListaLigada{
-    public:
+    private:
         NodoListaLigada<t> *head;
+    public:
         ListaLigada() : head(nullptr){}
         ~ListaLigada(){
             if (!destruirLista()){
@@ -24,6 +25,40 @@ class ListaLigada{
         bool destruirNodo(t datoIdentificador);
         bool imprimirLista();
         bool destruirLista();
+
+        class iterator {
+            public:
+                iterator(NodoListaLigada<t>* node) : current(node) {}
+
+                t& operator*() {
+                    return current->dato;
+                }
+
+                iterator& operator++() {
+                    if(current)
+                        current = current->next;
+                    return *this;
+                }
+
+                bool operator==(const iterator& other) const {
+                    return current == other.current;
+                }
+
+                bool operator!=(const iterator& other) const {
+                    return current != other.current;
+                }
+
+            private:
+                NodoListaLigada<t>* current;
+            };
+
+            iterator begin() {
+                return iterator(head);
+            }
+
+            iterator end() {
+               return iterator(nullptr);
+            }
 };
 
 template <typename t>
@@ -33,11 +68,12 @@ bool ListaLigada<t>::insertar(t dato){
 
     nuevo = new(nothrow) NodoListaLigada<t>;
 
-    if (!nuevo)
+    if (!nuevo){
         return false;
+    }
 
     nuevo->dato = dato;
-    
+
     if (!head){
         head = nuevo;
         return true;
@@ -70,9 +106,10 @@ template <typename t>
 bool ListaLigada<t>::destruirLista(){
     NodoListaLigada<t> *destructorNodal = head, *temp = nullptr;
 
-    if (!head)
+    if (!head){
         return false;
-
+    }
+        
     while (destructorNodal){
         temp = destructorNodal->next;
         delete destructorNodal;
