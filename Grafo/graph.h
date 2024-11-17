@@ -5,36 +5,6 @@
 using namespace std;
 
 template <typename t>
-class Vertex {
-    private:
-        t dato;
-        int index;
-    
-    public:
-        Vertex(): dato(t()), index(0) {}
-        Vertex(int index_): dato(t()), index(index_) {}
-        ~Vertex(){}
-
-        bool operator==(unsigned int edge) const {
-            return index == edge;
-        }
-
-        bool operator!=(unsigned int edge) const {
-            return index != edge;
-        }
-
-        bool operator==(const Vertex& other) const {
-            return index == other.index;
-        }
-
-        bool operator!=(const Vertex& other) const {
-            return index != other.index; 
-        }
-
-        int getIndex(){return index;}
-};
-
-template <typename t>
 class Graph{
     public:
         Graph() {
@@ -49,8 +19,37 @@ class Graph{
         bool loadFile(const string& filename);
         bool saveFile(const string& filename);
 
+        class Vertex {
+            private:
+                t dato;
+                int index;
+            
+            public:
+                Vertex(): dato(t()), index(0) {}
+                Vertex(int index_): dato(t()), index(index_) {}
+                ~Vertex(){}
+
+                bool operator==(unsigned int edge) const {
+                    return index == edge;
+                }
+
+                bool operator!=(unsigned int edge) const {
+                    return index != edge;
+                }
+
+                bool operator==(const Vertex& other) const {
+                    return index == other.index;
+                }
+
+                bool operator!=(const Vertex& other) const {
+                    return index != other.index; 
+                }
+
+                int getIndex(){return index;}
+        };
+
     private:
-        ListaLigada< Vertex<t> > *table;
+        ListaLigada< Vertex > *table;
         unsigned int size;
 };
 
@@ -58,7 +57,7 @@ template <typename t>
 bool Graph<t>::createGraph(unsigned int nSize) {
     if(nSize == 0 || table)
         return false;
-    table = new(std::nothrow) ListaLigada< Vertex<t> >[nSize];
+    table = new(std::nothrow) ListaLigada< Vertex >[nSize];
     if(!table)
         return false;
     size = nSize;
@@ -77,7 +76,7 @@ void Graph<t>::eliminateGraph() {
 template <typename t>
 bool Graph<t>::insertEdge(unsigned int vertex, int edge) {
     if (vertex < size) {
-        Vertex<t> v(edge);
+        Vertex v(edge);
         if (table[vertex].insertar(v))
             return true;
     } 
@@ -87,7 +86,7 @@ bool Graph<t>::insertEdge(unsigned int vertex, int edge) {
 template <typename t>
 bool Graph<t>::eliminateEdge(unsigned int vertex, int edge) {
     if (vertex < size) {
-        Vertex<t> v(edge);
+        Vertex v(edge);
         if (table[vertex].destruirNodo(v))
             return true;
     } 
@@ -146,7 +145,7 @@ bool Graph<t>::saveFile(const string& filename) {
     int counter = 0;
     while (counter < size){
         
-        for (typename ListaLigada< Vertex<t> >:: iterator j(table[counter].begin()); j != table[counter].end(); ++j) {
+        for (typename ListaLigada< Vertex >:: iterator j(table[counter].begin()); j != table[counter].end(); ++j) {
             file << (*j).getIndex() << ' ';
         }
         file << endl;
