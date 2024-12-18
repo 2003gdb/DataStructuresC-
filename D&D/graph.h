@@ -1,3 +1,7 @@
+// Crea un Grafo para recorrer la Dungeon de diferentes maneras.
+// Carlos A Galvez Diaz Barriga - A01067590
+// 23/11/24
+
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -8,32 +12,98 @@
 template <typename t>
 class Graph{
     public:
-        Graph() {
-        arrVertex = nullptr;
-        size = 0;
-        }
+        // Constructor por defecto de Graph.
+        // Inicializa el grafo con un tamaño de 0 y sin tabla.
+        Graph(): arrVertex(nullptr), size(0){};
+
+        // Destructor de Graph.
+        // Libera la memoria asignada para el grafo.
         ~Graph() { eliminateGraph(); };
+
+        // Crea un grafo de tamaño nSize, inicializando un arreglo de vértices.
+        // Parámetros:
+        //   nSize - el tamaño del grafo (número de vértices).
+        // Retorno:
+        //   true si el grafo se creó exitosamente; false en caso contrario.
         bool createGraph(unsigned int nSize);
+
+        // Elimina el grafo, liberando la memoria asignada.
         void eliminateGraph();
+
+        // Inserta una arista entre dos vértices.
+        // Parámetros:
+        //   vertex - índice del vértice de origen.
+        //   edge - índice del vértice de destino.
+        // Retorno:
+        //   true si la arista se insertó exitosamente, false en caso contrario.
         bool insertEdge(unsigned int vertex, unsigned int edge);
+
+        // Elimina una arista entre dos vértices.
+        // Parámetros:
+        //   vertex - índice del vértice de origen.
+        //   edge - índice del vértice de destino.
+        // Retorno:
+        //   true si la arista se eliminó exitosamente, false en caso contrario.
         bool eliminateEdge(unsigned int vertex, unsigned int edge);
+
+        // Carga un grafo desde un archivo.
+        // Parámetros:
+        //   filename - nombre del archivo que contiene la representación del grafo.
+        // Retorno:
+        //   true si el archivo se cargó exitosamente, false en caso contrario.
         bool loadFile(const string& filename);
+
+        // Guarda el grafo en un archivo.
+        // Parámetros:
+        //   filename - nombre del archivo donde se guardará la representación del grafo.
+        // Retorno:
+        //   true si el grafo se guardó exitosamente, false en caso contrario.
         bool saveFile(const string& filename);
+
+        // Asigna un valor a un vértice específico.
+        // Parámetros:
+        //   index - índice del vértice al que se asignará el dato.
+        //   dato - valor que se asignará al vértice.
+        // Retorno:
+        //   true si el dato se asignó exitosamente, false en caso contrario.
         bool setVertex(unsigned int index, t dato);
+
+        // Imprime el grafo en la consola.
         void print();
+
+        // Obtiene el tamaño del grafo (número de vértices).
+        // Retorno:
+        //   Número de vértices en el grafo.
         int getSize(){return size;};
 
+        // Realiza una búsqueda en profundidad (DFS) a partir del vértice inicial.
+        // Parámetros:
+        //   startVertex - índice del vértice desde el cual iniciar la búsqueda.
+        // Retorno:
+        //   true si la búsqueda se realizó exitosamente; false en caso contrario.
         bool DFS(unsigned int startVertex);
+
+        // Encuentra el mejor camino entre dos vértices usando una búsqueda en amplitud (BFS).
+        // Parámetros:
+        //   startVertex - índice del vértice de inicio.
+        //   endVertex - índice del vértice de destino.
+        //   path - referencia a una lista ligada donde se almacenará el mejor camino encontrado.
+        // Retorno:
+        //   true si se encontró un camino entre los vértices; false en caso contrario.
         bool BFS_Best_Path(unsigned int startVertex, unsigned int endVertex, ListaLigada<t> &path);
 
         class Vertex {
             public:
+                // Lista de aristas conectadas al vértice.
                 ListaLigada<unsigned int> edges;
+                // Dato almacenado en el vértice.
                 t dato;
         };
 
     private:
+        // Arreglo dinámico que almacena los vértices del grafo.
         Vertex *arrVertex;
+        // Tamaño del grafo (número de vértices).
         unsigned int size;
 };
 
@@ -65,7 +135,12 @@ bool Graph<t>::BFS_Best_Path(unsigned int startVertex, unsigned int endVertex, L
 
     while (!queue.isEmpty()) {
         unsigned int currentVertex = *queue.getFront();
-        queue.dequeue();
+        if (!queue.dequeue()){
+            delete[] vertexVisited;
+            delete[] previousVertex;
+            return false;
+        }
+
         if (currentVertex >= size) {
             delete[] vertexVisited;
             delete[] previousVertex;
@@ -88,15 +163,24 @@ bool Graph<t>::BFS_Best_Path(unsigned int startVertex, unsigned int endVertex, L
 
                     int current = endVertex;
                     while (current != startVertex) {
-                        stack.push(current);
+                        if (!stack.push(current)){
+                            delete[] vertexVisited;
+                            delete[] previousVertex;
+                            return false;
+                        }
                         current = previousVertex[current];
                     }
-                    stack.push(startVertex);
+                    if (!stack.push(startVertex)){
+                        delete[] vertexVisited;
+                        delete[] previousVertex;
+                        return false;
+                    }
                     while (!stack.isEmpty()){
+                        std::cout << *stack.getTop() << " ";
                         path.insertar(arrVertex[*stack.getTop()].dato);
                         stack.pop();
                     }
-
+                    std::cout << endl;
                     delete[] vertexVisited;
                     delete[] previousVertex;
                     return true;
@@ -104,7 +188,6 @@ bool Graph<t>::BFS_Best_Path(unsigned int startVertex, unsigned int endVertex, L
             }
         }
     }
-    std::cout << "END VERTEX NOT FOUND" << endl;
     delete[] vertexVisited;
     delete[] previousVertex;
     return false;
@@ -116,7 +199,7 @@ bool Graph<t>::DFS(unsigned int startVertex){
         return false;
 
     Stack<unsigned int> stack;
-    stack.push(startVertex);
+    if (!stack.push(startVertex)){return false;}
     std::cout << "DFS (" << startVertex << "): ";
 
     bool *vertexVisited = new(std::nothrow) bool[size];
@@ -126,7 +209,10 @@ bool Graph<t>::DFS(unsigned int startVertex){
 
     while (!stack.isEmpty()) {
         unsigned int currentVertex = *stack.getTop();
-        stack.pop();
+        if (!stack.pop()){
+            delete[] vertexVisited;
+            return false;
+        }
 
         if (!vertexVisited[currentVertex]) {
             vertexVisited[currentVertex] = true;
@@ -135,7 +221,10 @@ bool Graph<t>::DFS(unsigned int startVertex){
             ListaLigada<unsigned int>:: iterator it(nullptr);
             for (it = arrVertex[currentVertex].edges.begin(); it != arrVertex[currentVertex].edges.end(); ++it) {
                 if (!vertexVisited[*it]) {
-                    stack.push(*it);
+                    if (!stack.push(*it)){
+                        delete[] vertexVisited;
+                        return false;
+                    }
                 }
             }
         }
@@ -148,7 +237,7 @@ bool Graph<t>::DFS(unsigned int startVertex){
 template <typename t>
 void Graph<t>::print(){
     for (int i = 0; i < size; i++) {
-        std::cout << "[" << i << "]"<< arrVertex[i].dato << ":";
+        std::cout << "[" << i << "]"<< arrVertex[i].dato << " : ";
         arrVertex[i].edges.imprimirLista();
     }
 }
@@ -227,7 +316,8 @@ bool Graph<t>::loadFile(const string& filename) {
             createGraph(size);
         } else {
             while (getline(ss, edge, ' ')){
-                insertEdge(counter, stoi(edge));
+                if(!insertEdge(counter, stoi(edge)))
+                    return false;
             }
         }
         counter++;

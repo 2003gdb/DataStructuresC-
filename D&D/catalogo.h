@@ -13,7 +13,6 @@ template <typename t>
 class Catalogo {
     private:
         ArbolBinario<t> arbol;
-        int sizeCatalogo;
 
         // Selecciona recursivamente un nodo aleatorio en el árbol.
         // Parámetros:
@@ -25,7 +24,7 @@ class Catalogo {
     
     public:
         // Constructor: Inicializa el catálogo y establece el tamaño a cero.
-        Catalogo(): sizeCatalogo(0){ srand(time(NULL)); }
+        Catalogo(){}
 
         // Destructor: No realiza ninguna acción especial.
         ~Catalogo(){}
@@ -40,35 +39,12 @@ class Catalogo {
         // Devuelve un monstruo seleccionado aleatoriamente del catálogo.
         // Retorno:
         //   Monstruo seleccionado aleatoriamente.
-        t getRandomMonster();
+        t *getRandomMonster();
 };
 
-
 template <typename t>
-t Catalogo<t>::getRandomMonster() {
-    int randNum = rand() % sizeCatalogo + 1;
-
-    NodoArbolBinario<t>* randomNodo = nullptr;
-    
-    int numNodoActual = 0;
-    int *ptrNumNodoActual = &numNodoActual;
-
-    getRandomNodoRecursivo(arbol.buscarNodo(arbol.getRootMonstruo()), randomNodo, ptrNumNodoActual, randNum);
-    
-    return randomNodo->dato;
-}
-
-template <typename t>
-void Catalogo<t>::getRandomNodoRecursivo(NodoArbolBinario<t>*& padre, NodoArbolBinario<t>*& randomNodo, int *actual, int randNum){
-    if (!padre || randomNodo) return;
-
-    getRandomNodoRecursivo(padre->left, randomNodo, actual, randNum);
-    (*actual)++;
-    if ((*actual) == randNum) {
-        randomNodo = padre;
-        return;
-    }
-    getRandomNodoRecursivo(padre->right, randomNodo, actual, randNum);
+t *Catalogo<t>::getRandomMonster() {
+    return arbol.getRandomNodo();
 }
 
 template <typename t>
@@ -91,7 +67,7 @@ bool Catalogo<t>::loadFromCSV(const string& filename){
     cout << "Cargando archivo de criaturas" << endl;
     int counter;
     while (getline(file, line)){
-        Monstruo monstruo;
+        Monster monstruo;
         stringstream ss(line);
         string celda;
         counter = 1;
@@ -115,9 +91,9 @@ bool Catalogo<t>::loadFromCSV(const string& filename){
         }
 
         if (!arbol.inserta(monstruo)){
+            file.close();
             return false;
         }
-        sizeCatalogo++;
     }
     file.close();
     return true;

@@ -23,6 +23,7 @@ template <typename t>
 class ArbolBinario {
     private:
         NodoArbolBinario<t> *root;
+        int size;
 
         // Inserta recursivamente un dato en el árbol.
         // Parámetros:
@@ -68,9 +69,17 @@ class ArbolBinario {
         //   true si el recorrido fue exitoso.
         bool ramaPostOrder(NodoArbolBinario<t> *actual);
 
+        // Selecciona recursivamente un nodo aleatorio en el árbol.
+        // Parámetros:
+        //   nodo - referencia al nodo desde donde comienza la búsqueda.
+        //   chosenNodo - nodo aleatorio seleccionado.
+        //   actual - puntero al contador de nodos visitados.
+        //   randNum - número aleatorio para seleccionar el nodo.
+        void getRandomNodoRecursivo(NodoArbolBinario<t>*& padre, NodoArbolBinario<t>*& randomNodo, int *actual, int randNum);
+
     public:
         // Constructor: Inicializa un árbol binario vacío.
-        ArbolBinario(): root(nullptr){}
+        ArbolBinario(): root(nullptr), size(0){ srand(time(NULL)); }
 
         // Destructor: Elimina todos los nodos del árbol al destruir el objeto.
         ~ArbolBinario(){
@@ -122,11 +131,43 @@ class ArbolBinario {
         // Retorno:
         //   El valor del dato en la raíz del árbol.
         t getRootMonstruo(){return root->dato;}
+
+        // Devuelve un nodo seleccionado aleatoriamente del arbol.
+        // Retorno:
+        //   Monstruo seleccionado aleatoriamente.
+        t *getRandomNodo();
 };
 
+template <typename t>
+t *ArbolBinario<t>::getRandomNodo(){
+    int randNum = rand() % size + 1;
+
+    NodoArbolBinario<t>* randomNodo = nullptr;
+    
+    int numNodoActual = 0;
+    int *ptrNumNodoActual = &numNodoActual;
+
+    getRandomNodoRecursivo(root, randomNodo, ptrNumNodoActual, randNum);
+    
+    return &(randomNodo->dato);
+}
+
+template <typename t>
+void ArbolBinario<t>::getRandomNodoRecursivo(NodoArbolBinario<t>*& padre, NodoArbolBinario<t>*& randomNodo, int *actual, int randNum){
+    if (!padre || randomNodo) return;
+
+    getRandomNodoRecursivo(padre->left, randomNodo, actual, randNum);
+    (*actual)++;
+    if ((*actual) == randNum) {
+        randomNodo = padre;
+        return;
+    }
+    getRandomNodoRecursivo(padre->right, randomNodo, actual, randNum);
+}
 
 template <typename t>
 bool ArbolBinario<t>::inserta(t dato){
+    size++;
     return insertaRecursivamente(root, dato);
 }
 
@@ -173,6 +214,7 @@ bool ArbolBinario<t>::borrarArbol(){
 
     borrarRama(root);
     root = nullptr;
+    size = 0;
     return true;
 }
 
@@ -219,12 +261,13 @@ bool ArbolBinario<t>::borrarNodo(t dato){
 
         delete ptr;
         actual->right = nullptr;
-
+        size--;
         return true;
 
     } else if ((!ptr->left) && (!ptr->right)){
         delete direccionPtr;
         direccionPtr = nullptr;
+        size--;
         return true;
 
     } else if (ptr->left){
@@ -236,6 +279,7 @@ bool ArbolBinario<t>::borrarNodo(t dato){
         delete temp;
         temp = nullptr;
         ptr = nullptr;
+        size--;
         return true;
         
     } else if (ptr->right){
@@ -247,6 +291,7 @@ bool ArbolBinario<t>::borrarNodo(t dato){
         delete temp;
         temp = nullptr;
         ptr = nullptr;
+        size--;
         return true;
     }
     return true;

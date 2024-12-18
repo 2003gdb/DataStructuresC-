@@ -2,8 +2,8 @@
 #include "graph.h"
 
 int main() {
-    Graph<int> grafo;
-    ListaLigada<int> path;
+    Graph<unsigned int> grafo;
+    //ListaLigada<unsigned int> path;
 
     if (!grafo.loadFile("dungeon.txt")){
         cerr << "No se pudo cargar" << endl;
@@ -13,12 +13,7 @@ int main() {
         grafo.setVertex(i, i);
     }
 
-    grafo.DFS(0);
-    grafo.DFS(3);
-
-    grafo.BFS_Best_Path(16, 30, path);
-
-    path.imprimirLista();
+    grafo.print();
 
     if (!grafo.saveFile("dungeon.txt")){
         cerr << "No se pudo cargar" << endl;

@@ -5,7 +5,6 @@
 #include <iostream>
 #include <string>
 #include "ll.h"
-using namespace std;
 
 template <typename t>
 class Jugador {

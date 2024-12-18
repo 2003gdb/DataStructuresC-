@@ -15,7 +15,7 @@ class Graph{
         ~Graph() { eliminateGraph(); };
         bool createGraph(unsigned int nSize);
         void eliminateGraph();
-        bool insertEdge(unsigned int vertex, unsigned int edge);
+        bool insertEdge(unsigned int vertex, unsigned int edge, unsigned int weight);
         bool eliminateEdge(unsigned int vertex, unsigned int edge);
         bool loadFile(const string& filename);
         bool saveFile(const string& filename);
@@ -26,9 +26,17 @@ class Graph{
         bool DFS(unsigned int startVertex);
         bool BFS_Best_Path(unsigned int startVertex, unsigned int endVertex, ListaLigada<t> &path);
 
+        class Edges {
+            public:
+                unsigned int weight;
+                unsigned int vertex_index;
+                Edges() : vertex_index(0), weight(0) {}
+                Edges(unsigned int vertex_index, unsigned int weight): vertex_index(vertex_index), weight(weight) {}
+        };
+
         class Vertex {
             public:
-                ListaLigada<unsigned int> edges;
+                ListaLigada<Edges> edges;
                 t dato;
         };
 
@@ -147,9 +155,14 @@ bool Graph<t>::DFS(unsigned int startVertex){
 
 template <typename t>
 void Graph<t>::print(){
-    for (int i = 0; i < size; i++) {
-        std::cout << "[" << i << "]"<< arrVertex[i].dato << ":";
-        arrVertex[i].edges.imprimirLista();
+    for (int currentVertex = 0; currentVertex < size; currentVertex++) {
+        std::cout << "[" << currentVertex << "]"<< arrVertex[currentVertex].dato << ":";
+
+        typename ListaLigada<Graph<t>::Edges>:: iterator it(nullptr);
+        for (it = arrVertex[currentVertex].edges.begin(); it != arrVertex[currentVertex].edges.end(); ++it) {
+            std::cout << " e." << (*it).vertex_index << " w." << (*it).weight << " |||" ;
+        }
+        cout << endl;
     }
 }
 
@@ -183,8 +196,9 @@ void Graph<t>::eliminateGraph() {
 }
 
 template <typename t>
-bool Graph<t>::insertEdge(unsigned int vertex, unsigned int edge) {
-    if (vertex < size || !arrVertex[vertex].edges.search(edge)) {
+bool Graph<t>::insertEdge(unsigned int vertex, unsigned int edge_index, unsigned int weight) {
+    if (vertex < size) { // Falta revisar, que no se repita el numero en la lista ligada de edges
+        Edges edge(edge_index, weight);
         if (arrVertex[vertex].edges.insertar(edge))
             return true;
     } 
@@ -218,6 +232,7 @@ bool Graph<t>::loadFile(const string& filename) {
     }
 
     int counter = -1;
+    int weight;
     while (getline(file, line)){
         stringstream ss(line);
         string edge;
@@ -226,8 +241,9 @@ bool Graph<t>::loadFile(const string& filename) {
             size = stoi(line);
             createGraph(size);
         } else {
-            while (getline(ss, edge, ' ')){
-                insertEdge(counter, stoi(edge));
+            while (getline(ss, edge, ' ')){ 
+                weight = stoi(edge) % counter;
+                insertEdge(counter, stoi(edge), weight);
             }
         }
         counter++;
@@ -251,10 +267,10 @@ bool Graph<t>::saveFile(const string& filename) {
 
     int counter = 0;
     while (counter < size){
-        ListaLigada<unsigned int>:: iterator j(nullptr);
+        typename ListaLigada<Graph<t>::Edges>:: iterator j(nullptr);
         
         for (j = arrVertex[counter].edges.begin(); j != arrVertex[counter].edges.end(); ++j) {
-            file << *j << ' ';
+            file << (*j).vertex_index << ' ';
         }
         file << endl;
         counter++;
